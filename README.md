@@ -93,10 +93,4 @@ O projeto utiliza o **shadcn/ui** com configuração personalizada:
 - CSS Variables habilitadas
 - Componentes totalmente customizáveis
 
-## 📝 Licença
-
-Este projeto foi desenvolvido durante o NLW (Next Level Week) da Rocketseat.
-
 ---
-
-Desenvolvido com ❤️ usando as melhores práticas do ecossistema React moderno.
