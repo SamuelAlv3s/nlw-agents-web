@@ -14,11 +14,11 @@ export function RecordRoomAudio() {
 
     const params = useParams<RoomParams>()
 
-
-
     const [isRecording, setIsRecording] = useState(false);
 
     const recorder = useRef<MediaRecorder | null>(null);
+
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     async function stopRecording() {
         setIsRecording(false);
@@ -27,17 +27,45 @@ export function RecordRoomAudio() {
             recorder.current.stop();
         }
 
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+
+    }
+
+    function createRecorder(audio: MediaStream) {
+
+        recorder.current = new window.MediaRecorder(audio, {
+            mimeType: 'audio/webm',
+            audioBitsPerSecond: 64_000,
+        });
+
+        recorder.current.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                uploadAudio(event.data);
+            }
+        };
+
+        recorder.current.onstart = () => {
+            console.log('Iniciando gravação');
+        }
+
+        recorder.current.onstop = () => {
+            console.log('Parando gravação');
+        }
+
+        recorder.current.start();
     }
 
     async function uploadAudio(audio: Blob) {
         const formData = new FormData();
         formData.append('file', audio, 'audio.webm');
-        const response = await fetch(`http://localhost:3000/rooms/${params.roomId}/audio`, {
+        const response = await fetch(`http://localhost:3333/rooms/${params.roomId}/audio`, {
             method: 'POST',
             body: formData,
         });
         const result = await response.json();
-        console.log(result);
+        console.log(result.audioUrl);
     }
 
     async function startRecording() {
@@ -56,25 +84,13 @@ export function RecordRoomAudio() {
             }
         });
 
-        recorder.current = new window.MediaRecorder(audio, {
-            mimeType: 'audio/webm',
-            audioBitsPerSecond: 64_000,
-        });
+        createRecorder(audio);
 
+        intervalRef.current = setInterval(() => {
+            recorder.current?.stop();
 
-        recorder.current.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                uploadAudio(event.data);
-            }
-        };
-
-        recorder.current.onstart = () => {
-
-        }
-
-        recorder.current.onstop = () => { }
-
-        recorder.current.start();
+           createRecorder(audio);
+        }, 5000);
     }
 
     if (!params.roomId) {

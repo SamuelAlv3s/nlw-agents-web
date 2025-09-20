@@ -3,7 +3,7 @@ import type { CreateQuestionRequest } from './types/create-question-request'
 import type { CreateQuestionResponse } from './types/create-question-response'
 import type { GetRoomQuestionsResponse } from './types/get-room-questions-response'
 
-export function useCreateQuestion(roomId: string) {
+export function  useCreateQuestion(roomId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
